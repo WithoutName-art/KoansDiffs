@@ -1,6 +1,6 @@
-require File.expand_path(File.dirname(__FILE__) + '/neo')
+# frozen_string_literal: true
 
-include Java
+require File.expand_path(File.dirname(__FILE__) + '/neo')
 
 # Concepts
 # * Pull in a java class
@@ -10,12 +10,15 @@ include Java
 # * Ruby Strings  VS Java Strings
 # * Calling custom java class
 # * Calling Ruby from java???
-
+#:nodoc:
 class AboutJavaInterop < Neo::Koan
-  def test_using_a_java_library_class
-    java_array = java.util.ArrayList.new
-    assert_equal __, java_array.class
-  end
+  include Java
+     # rubocop:disable Layout/IndentationConsistency
+     def test_using_a_java_library_class
+       # rubocop:enable Layout/IndentationConsistency
+       java_array = java.util.ArrayList.new
+       assert_equal __, java_array.class
+     end
 
   def test_java_class_can_be_referenced_using_both_ruby_and_java_like_syntax
     assert_equal __, Java::JavaUtil::ArrayList == java.util.ArrayList
@@ -23,7 +26,7 @@ class AboutJavaInterop < Neo::Koan
 
   def test_include_class_includes_class_in_module_scope
     assert_nil defined?(TreeSet)
-    include_class "java.util.TreeSet"
+    include_class 'java.util.TreeSet'
     assert_equal __, defined?(TreeSet)
   end
 
@@ -39,37 +42,37 @@ class AboutJavaInterop < Neo::Koan
 
   JString = java.lang.String
   def test_also_java_class_can_be_given_ruby_aliases
-    java_string = JString.new("A Java String")
+    java_string = JString.new('A Java String')
     assert_equal __, java_string.class
     assert_equal __, JString
   end
 
   def test_can_directly_call_java_methods_on_java_objects
-    java_string = JString.new("A Java String")
+    java_string = JString.new('A Java String')
     assert_equal __, java_string.toLowerCase
   end
 
   def test_jruby_provides_snake_case_versions_of_java_methods
-    java_string = JString.new("A Java String")
+    java_string = JString.new('A Java String')
     assert_equal __, java_string.to_lower_case
   end
 
   def test_jruby_provides_question_mark_versions_of_boolean_methods
-    java_string = JString.new("A Java String")
-    assert_equal __, java_string.endsWith("String")
-    assert_equal __, java_string.ends_with("String")
-    assert_equal __, java_string.ends_with?("String")
+    java_string = JString.new('A Java String')
+    assert_equal __, java_string.endsWith('String')
+    assert_equal __, java_string.ends_with('String')
+    assert_equal __, java_string.ends_with?('String')
   end
 
   def test_java_string_are_not_ruby_strings
-    ruby_string = "A Java String"
+    ruby_string = 'A Java String'
     java_string = java.lang.String.new(ruby_string)
     assert_equal __, java_string.is_a?(java.lang.String)
     assert_equal __, java_string.is_a?(String)
   end
 
   def test_java_strings_can_be_compared_to_ruby_strings_maybe
-    ruby_string = "A Java String"
+    ruby_string = 'A Java String'
     java_string = java.lang.String.new(ruby_string)
     assert_equal __, ruby_string == java_string
     assert_equal __, java_string == ruby_string
@@ -88,21 +91,27 @@ class AboutJavaInterop < Neo::Koan
     # How would you do it?
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_however_most_methods_returning_strings_return_ruby_strings
+    # rubocop:enable Metrics/AbcSize
     java_array = java.util.ArrayList.new
     assert_equal __, java_array.toString
     assert_equal __, java_array.toString.is_a?(String)
     assert_equal __, java_array.toString.is_a?(java.lang.String)
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_some_ruby_objects_can_be_coerced_to_java
-    assert_equal __, "ruby string".to_java.class
+    # rubocop:enable Metrics/AbcSize
+    assert_equal __, 'ruby string'.to_java.class
     assert_equal __, 1.to_java.class
     assert_equal __, 9.32.to_java.class
     assert_equal __, false.to_java.class
   end
 
+  # rubocop:disable Metrics/AbcSize
   def test_some_ruby_objects_are_not_coerced_to_what_you_might_expect
+    # rubocop:enable Metrics/AbcSize
     assert_equal __, [].to_java.class == Java::JavaUtil::ArrayList
     assert_equal __, {}.to_java.class == Java::JavaUtil::HashMap
     assert_equal __, Object.new.to_java.class == Java::JavaLang::Object
@@ -110,28 +119,33 @@ class AboutJavaInterop < Neo::Koan
 
   def test_java_collections_are_enumerable
     java_array = java.util.ArrayList.new
-    java_array << "one" << "two" << "three"
-    assert_equal __, java_array.map { |item| item.upcase }
+    java_array << 'one' << 'two' << 'three'
+    assert_equal __, java_array.map(&:upcase)
   end
 
   # ------------------------------------------------------------------
 
   # Open the Java ArrayList class and add a new method.
-  class Java::JavaUtil::ArrayList
-    def multiply_all
-      result = 1
-      each do |item|
-        result *= item
+  class Java
+    #:nodoc:
+    class JavaUtil
+      #:nodoc:
+      class ArrayList
+        def multiply_all
+          result = 1
+          each do |item|
+            result *= item
+          end
+          result
+        end
       end
-      result
     end
   end
 
   def test_java_class_are_open_from_ruby
     java_array = java.util.ArrayList.new
-    java_array.add_all([1,2,3,4,5])
+    java_array.add_all([1, 2, 3, 4, 5])
 
     assert_equal __, java_array.multiply_all
   end
-
 end
